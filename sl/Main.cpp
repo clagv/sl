@@ -2,6 +2,7 @@
 #include "SLData.h"
 #include "SLVector.h"
 #include "SLMap.h"
+#include "SLSet.h"
 #include "SLPair.h"
 #include <iostream>
 #include <iterator>
@@ -72,5 +73,7 @@ int main()
     std::copy(lvl2.m_lvl1.m_vec.begin(), lvl2.m_lvl1.m_vec.end(), std::ostream_iterator<std::string>(std::cout, " "));
     std::cout << '\n' << lvl2.m_vecVec.at(2).at(2) << '\n';
     std::cout << (++lvl2.m_map.begin())->first << '\n';
+    std::set<std::string> strSet;
+    makeSerializable("", strSet);
     return 0;
 }

@@ -78,9 +78,11 @@
   <ItemGroup>
     <ClInclude Include="IData.h" />
     <ClInclude Include="ISerializable.h" />
+    <ClInclude Include="SLAssociativeContainer.h" />
     <ClInclude Include="SLData.h" />
     <ClInclude Include="SLMap.h" />
     <ClInclude Include="SLPair.h" />
+    <ClInclude Include="SLSet.h" />
     <ClInclude Include="SLUtils.h" />
     <ClInclude Include="SLVector.h" />
   </ItemGroup>
