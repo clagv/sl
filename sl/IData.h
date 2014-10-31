@@ -14,6 +14,8 @@ namespace sl
         virtual IDataWrite* get_data(const std::string& key, size_t keyIdx = IdxNewEntry) = 0;
         // sets new (IdxNewEntry) or existing key (any other value, if available) with val
         virtual bool set_val(const std::string& key, const std::string& val, size_t keyIdx = IdxNewEntry) = 0;
+        // remove entry (data or value) with specfied key and index keyIdx (if there are multiple entries with that key)
+        virtual bool erase(const std::string& key, size_t keyIdx = 0) = 0;
 
         virtual ~IDataWrite(){}
     };

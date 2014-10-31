@@ -75,5 +75,14 @@ int main()
     std::cout << (++lvl2.m_map.begin())->first << '\n';
     std::set<std::string> strSet;
     makeSerializable("", strSet);
+    IData* pd = dt->get_data("vv", 0)->get_data("item", 2);
+    pd->begin();
+    pd->next();
+    pd->erase("item", 2);
+    if(pd->end())
+        std::cout << "erase error";
+    pd->erase("item", 1);
+    if(!pd->end())
+        std::cout << "erase error";
     return 0;
 }

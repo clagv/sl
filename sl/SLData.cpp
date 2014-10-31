@@ -56,6 +56,8 @@ namespace sl
         virtual IData* get_data(const std::string& key, size_t keyIdx = IdxNewEntry);
         // sets new (IdxNewEntry) or existing key (any other value, if available) with val
         virtual bool set_val(const std::string& key, const std::string& val, size_t keyIdx = IdxNewEntry);
+        // remove entry (data or value) with specfied key and index keyIdx (if there are multiple entries with that key)
+        virtual bool erase(const std::string& key, size_t keyIdx = 0);
 
         // start iterating at current level
         virtual void begin();
@@ -145,6 +147,25 @@ namespace sl
         {
             m_varData[pos] = DataVariant(val);
             return true;
+        }
+        return false;
+    }
+    bool Data::erase(const std::string& key, size_t keyIdx)
+    {
+        if(keyIdx < m_keyIdx.size())
+        {
+            KeyIdx ki(key, 0);
+            size_t pos = (std::lower_bound(m_keyIdx.begin(), m_keyIdx.end(), ki, key_less) - m_keyIdx.begin()) + keyIdx;
+            if(pos < m_keyIdx.size() && key_eql(ki, m_keyIdx[pos]))
+            {
+                // users shouldn't really erase keys while reading data but ...
+                if(m_pos < m_keyIdx.size() && m_pos > pos)
+                    --pos;
+                m_keyIdx.erase(m_keyIdx.begin() + pos);
+                m_keys.erase(m_keys.begin() + pos);
+                m_varData.erase(m_varData.begin() + pos);
+                return true;
+            }
         }
         return false;
     }
