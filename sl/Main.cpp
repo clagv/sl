@@ -41,7 +41,7 @@ ISerializablePtr makeSerializable(const std::string& key, Lvl2& lvl2)
     ISerializableObjPtr wrt = createSerializableObj(key);
     add(wrt, "c", lvl2.m_c);
     add(wrt, makeSerializable("1", lvl2.m_lvl1));
-    add(wrt, "vv.subv.elem", lvl2.m_vecVec);
+    add(wrt, "vv", lvl2.m_vecVec);
     add(wrt, makeSerializable("map", lvl2.m_map));
     return wrt;
 }
@@ -64,7 +64,7 @@ int main()
     ser->write(dt.get());
     dt->get_data("1", 0)->set_val("a", "blah", 0);
     dt->get_data("1", 0)->get_data("vec", 0)->set_val("item", "vec1", 1);
-    dt->get_data("vv", 0)->get_data("subv", 2)->set_val("elem", "vv22", 2);
+    dt->get_data("vv", 0)->get_data("item", 2)->set_val("item", "vv22", 2);
     dt->get_data("map", 0)->get_data("mapKey2")->set_val("item", "mapVal2");
     dt->set_val("c", "OK", 0);
     ser->read(dt.get());

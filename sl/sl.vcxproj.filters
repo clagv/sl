@@ -42,6 +42,9 @@
     <ClInclude Include="SLSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SLSequenceContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

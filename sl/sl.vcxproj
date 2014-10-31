@@ -82,6 +82,7 @@
     <ClInclude Include="SLData.h" />
     <ClInclude Include="SLMap.h" />
     <ClInclude Include="SLPair.h" />
+    <ClInclude Include="SLSequenceContainer.h" />
     <ClInclude Include="SLSet.h" />
     <ClInclude Include="SLUtils.h" />
     <ClInclude Include="SLVector.h" />

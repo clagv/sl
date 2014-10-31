@@ -18,7 +18,6 @@ namespace sl
     };
 
     ISerializableObjPtr createSerializableObj(const std::string& key = std::string());
-    std::string splitKey(const std::string& key, std::string& subKey);
 
     inline
     void add(ISerializableObjPtr& to, const ISerializablePtr& ptr)

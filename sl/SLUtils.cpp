@@ -65,11 +65,4 @@ namespace sl
     {
         return ISerializablePtr(new StrSerializable(key, val));
     }
-    std::string splitKey(const std::string& key, std::string& subKey)
-    {
-        std::string::size_type p = key.find('.');
-        if(p < key.size())
-            subKey = key.substr(p+1, std::string::npos);
-        return key.substr(0, p);
-    }
 }
