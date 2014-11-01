@@ -13,7 +13,7 @@ namespace sl
             StrSerializable(const std::string& key, std::string& val) : m_key(key), m_val(&val) {}
             virtual void write(IDataWrite* data) const
             {
-                data->set_val(m_key, *m_val);
+                data->setVal(m_key, *m_val);
             }
             virtual void read(IDataRead* data)
             {
@@ -46,7 +46,7 @@ namespace sl
         private:
             IDataWrite* dataForKey(const std::string& key, IDataWrite* data) const
             {
-                return key.empty() ? data : data->get_data(key);
+                return key.empty() ? data : data->getDataWrite(key);
             }
             IDataRead* dataForKey(const std::string& key, IDataRead* data) const
             {

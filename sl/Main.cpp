@@ -62,11 +62,11 @@ int main()
     lvl2.m_map["mapKey"] = StrVec(2, "mapVal");
     IDataPtr dt = createEmptyData();
     ser->write(dt.get());
-    dt->get_data("1", 0)->set_val("a", "blah", 0);
-    dt->get_data("1", 0)->get_data("vec", 0)->set_val("item", "vec1", 1);
-    dt->get_data("vv", 0)->get_data("item", 2)->set_val("item", "vv22", 2);
-    dt->get_data("map", 0)->get_data("mapKey2")->set_val("item", "mapVal2");
-    dt->set_val("c", "OK", 0);
+    dt->getDataWrite("1", 0)->setVal("a", "blah", 0);
+    dt->getDataWrite("1", 0)->getDataWrite("vec", 0)->setVal("item", "vec1", 1);
+    dt->getDataWrite("vv", 0)->getDataWrite("item", 2)->setVal("item", "vv22", 2);
+    dt->getDataWrite("map", 0)->getDataWrite("mapKey2")->setVal("item", "mapVal2");
+    dt->setVal("c", "OK", 0);
     ser->read(dt.get());
     std::cout << lvl2.m_lvl1.m_a << '\n';
     std::cout << lvl2.m_c << '\n';
@@ -75,7 +75,7 @@ int main()
     std::cout << (++lvl2.m_map.begin())->first << '\n';
     std::set<std::string> strSet;
     makeSerializable("", strSet);
-    IData* pd = dt->get_data("vv", 0)->get_data("item", 2);
+    IData* pd = dt->getDataWrite("vv", 0)->getDataWrite("item", 2);
     pd->begin();
     pd->next();
     pd->erase("item", 2);

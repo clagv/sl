@@ -42,7 +42,7 @@ namespace sl
         virtual void write(IDataWrite* data) const
         {
             if(!m_key.empty())
-                data = data->get_data(m_key);
+                data = data->getDataWrite(m_key);
             type tmp;
             ISerializablePtr ser = makeSerializable(detail::pairKey<key_type>(), tmp);
             for(Cont::const_iterator it = m_cont->begin(); it != m_cont->end(); ++it)

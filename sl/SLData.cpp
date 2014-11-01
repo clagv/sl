@@ -53,9 +53,9 @@ namespace sl
         Data() : m_pos(IdxNewEntry) {}
 
         // pointer to new (IdxNewEntry) or existing node (any other value for keyIdx if available)
-        virtual IData* get_data(const std::string& key, size_t keyIdx = IdxNewEntry);
+        virtual IData* getDataWrite(const std::string& key, size_t keyIdx = IdxNewEntry);
         // sets new (IdxNewEntry) or existing key (any other value, if available) with val
-        virtual bool set_val(const std::string& key, const std::string& val, size_t keyIdx = IdxNewEntry);
+        virtual bool setVal(const std::string& key, const std::string& val, size_t keyIdx = IdxNewEntry);
         // remove entry (data or value) with specfied key and index keyIdx (if there are multiple entries with that key)
         virtual bool erase(const std::string& key, size_t keyIdx = 0);
 
@@ -68,7 +68,7 @@ namespace sl
         // current key
         virtual std::string key() const;
         // query existence
-        virtual bool has_key(const std::string& key) const;
+        virtual bool hasKey(const std::string& key) const;
 
         // inspect specific or current (empty key) item
         virtual Type type(const std::string& key = std::string()) const;
@@ -128,14 +128,14 @@ namespace sl
             throw std::exception("sl::Data::idx - key not found");
         return IdxNewEntry;
     }
-    IData* Data::get_data(const std::string& key, size_t keyIdx)
+    IData* Data::getDataWrite(const std::string& key, size_t keyIdx)
     {
         size_t pos = (IdxNewEntry == keyIdx) ? newEntry(key, DataVariant(createEmptyData())) : idx(key, keyIdx, false);
         if(pos < m_varData.size())
             return m_varData[pos].data().get();
         return 0;
     }
-    bool Data::set_val(const std::string& key, const std::string& val, size_t keyIdx)
+    bool Data::setVal(const std::string& key, const std::string& val, size_t keyIdx)
     {
         if(IdxNewEntry == keyIdx) 
         {
@@ -185,7 +185,7 @@ namespace sl
     {
         return m_keys[curIdx(true)];
     }
-    bool Data::has_key(const std::string& key) const
+    bool Data::hasKey(const std::string& key) const
     {
         return IdxNewEntry != idx(key, 0, false);
     }
