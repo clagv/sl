@@ -54,7 +54,7 @@ namespace sl
         virtual void read(IDataRead* data)
         {
             if(!m_key.empty())
-                data = data->data(m_key);
+                data = data->getData(m_key);
             type tmp;
             ISerializablePtr ser = makeSerializable(detail::pairKey<key_type>(), tmp);
             Cont c;

@@ -31,6 +31,11 @@ namespace sl
     {
         add(to, makeSerializable(key, val));
     }
-    ISerializablePtr makeSerializable(const std::string& key, std::string& val);
+    ISerializablePtr makeSerializable(const std::string& key, bool&         val);
+    ISerializablePtr makeSerializable(const std::string& key, int&          val);
+    ISerializablePtr makeSerializable(const std::string& key, long&         val);
+    ISerializablePtr makeSerializable(const std::string& key, size_t&       val);
+    ISerializablePtr makeSerializable(const std::string& key, double&       val);
+    ISerializablePtr makeSerializable(const std::string& key, std::string&  val);
 
 }
