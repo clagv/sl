@@ -45,6 +45,9 @@
     <ClInclude Include="SLSequenceContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SLVar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SLUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SLVar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

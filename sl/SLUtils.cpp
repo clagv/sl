@@ -8,20 +8,20 @@ namespace sl
         typedef std::vector<ISerializablePtr> Serializables;
         typedef std::vector<std::string> StrVec;
 
-        void getDataType(IDataRead* data, const std::string& key, bool&         b){b = data->getBool(key);}
-        void getDataType(IDataRead* data, const std::string& key, long&         l){l = data->getLong(key);}
-        void getDataType(IDataRead* data, const std::string& key, int&          n){n = data->getInt(key);}
-        void getDataType(IDataRead* data, const std::string& key, size_t&       k){k = data->getSize_t(key);}
-        void getDataType(IDataRead* data, const std::string& key, double&       x){x = data->getDouble(key);}
-        void getDataType(IDataRead* data, const std::string& key, std::string&  s){s = data->getStr(key);}
+        void getDataType(IDataRead* data, const std::string& key, bool&         b){b = data->getVar(key).get_bool();}
+        void getDataType(IDataRead* data, const std::string& key, long&         l){l = data->getVar(key).get_lng();}
+        void getDataType(IDataRead* data, const std::string& key, int&          n){n = data->getVar(key).get_int();}
+        void getDataType(IDataRead* data, const std::string& key, size_t&       k){k = data->getVar(key).get_szt();}
+        void getDataType(IDataRead* data, const std::string& key, double&       x){x = data->getVar(key).get_dbl();}
+        void getDataType(IDataRead* data, const std::string& key, std::string&  s){s = data->getVar(key).get_chr();}
 
         template<typename T>
-        struct SLRawSerializable : public ISerializable
+        struct SLVarSerializable : public ISerializable
         {
-            SLRawSerializable(const std::string& key, T& val) : m_key(key), m_val(&val) {}
+            SLVarSerializable(const std::string& key, T& val) : m_key(key), m_val(&val) {}
             virtual void write(IDataWrite* data) const
             {
-                data->setVal(m_key, *m_val);
+                data->setVar(m_key, SLVar(*m_val));
             }
             virtual void read(IDataRead* data)
             {
@@ -70,26 +70,26 @@ namespace sl
     }
     ISerializablePtr makeSerializable(const std::string& key, bool&         val)
     {
-        return ISerializablePtr(new SLRawSerializable<bool>(key, val));
+        return ISerializablePtr(new SLVarSerializable<bool>(key, val));
     }
     ISerializablePtr makeSerializable(const std::string& key, int&          val)
     {
-        return ISerializablePtr(new SLRawSerializable<int>(key, val));
+        return ISerializablePtr(new SLVarSerializable<int>(key, val));
     }
     ISerializablePtr makeSerializable(const std::string& key, long&         val)
     {
-        return ISerializablePtr(new SLRawSerializable<long>(key, val));
+        return ISerializablePtr(new SLVarSerializable<long>(key, val));
     }
     ISerializablePtr makeSerializable(const std::string& key, size_t&       val)
     {
-        return ISerializablePtr(new SLRawSerializable<size_t>(key, val));
+        return ISerializablePtr(new SLVarSerializable<size_t>(key, val));
     }
     ISerializablePtr makeSerializable(const std::string& key, double&       val)
     {
-        return ISerializablePtr(new SLRawSerializable<double>(key, val));
+        return ISerializablePtr(new SLVarSerializable<double>(key, val));
     }
     ISerializablePtr makeSerializable(const std::string& key, std::string&  val)
     {
-        return ISerializablePtr(new SLRawSerializable<std::string>(key, val));
+        return ISerializablePtr(new SLVarSerializable<std::string>(key, val));
     }
 }

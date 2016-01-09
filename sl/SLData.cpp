@@ -27,41 +27,13 @@ namespace sl
         {
             return key_cmp(l, r) == 0;
         }
-        class SLVariant
+        struct SLStore
         {
-        public:
-            explicit SLVariant(bool b)                    : m_type(SLBool)                {m_u.b = b;}
-            explicit SLVariant(int n)                     : m_type(SLInt)                 {m_u.n = n;}
-            explicit SLVariant(long l)                    : m_type(SLLong)                {m_u.l = l;}
-            explicit SLVariant(size_t k)                  : m_type(SLSize_t)              {m_u.k = k;}
-            explicit SLVariant(double d)                  : m_type(SLDouble)              {m_u.d = d;}
-            explicit SLVariant(const std::string& str)    : m_type(SLString), m_str(str)  {}
-            explicit SLVariant(const IDataPtr& data)      : m_type(SLData), m_data(data)  {}
-            SLDataType type() const {return m_type;}
-            bool getBool()                 const {assertType(SLBool);      return m_u.b; }
-            int  getInt()                  const {assertType(SLInt);       return m_u.n; }
-            long getLong()                 const {assertType(SLLong);      return m_u.l; }
-            size_t getSize_t()             const {assertType(SLSize_t);    return m_u.k; }
-            double getDouble()             const {assertType(SLDouble);    return m_u.d; }
-            const std::string& getStr()    const {assertType(SLString);    return m_str; }
-            const IDataPtr& getData()      const {assertType(SLData);      return m_data; }
-        private:
-            void assertType(SLDataType t) const
-            {
-                if(m_type != t)
-                    throw std::exception("SLVariant: wrong type requested");
-            }
-            SLDataType      m_type;
-            std::string     m_str;
-            IDataPtr        m_data;
-            union
-            {
-                bool    b;
-                int     n;
-                long    l;
-                size_t  k;
-                double  d;
-            }m_u;
+            explicit SLStore(const IDataPtr& data) : m_data(data)  {}
+            explicit SLStore(const SLVar& var)     : m_var(var){}
+
+            SLVar    m_var;
+            IDataPtr m_data;
         };
     }
     class Data : public IData
@@ -81,22 +53,11 @@ namespace sl
         virtual bool hasKey(const std::string& key) const;
 
         // inspect specific or current (empty key or key matchin current one) item
-        virtual SLDataType  type     (const std::string& key = std::string()) const;
-        virtual bool        getBool  (const std::string& key = std::string()) const;
-        virtual int         getInt   (const std::string& key = std::string()) const;
-        virtual long        getLong  (const std::string& key = std::string()) const;
-        virtual size_t      getSize_t(const std::string& key = std::string()) const;
-        virtual double      getDouble(const std::string& key = std::string()) const;
-        virtual std::string getStr   (const std::string& key = std::string()) const;
+        virtual SLVar       getVar   (const std::string& key = std::string()) const;
         virtual IDataRead*  getData  (const std::string& key = std::string()) const;
 
         // sets new (IdxNewEntry) or existing key (any other value, if available) with val
-        virtual bool setVal(const std::string& key, bool               b, size_t keyIdx = IdxNewEntry);
-        virtual bool setVal(const std::string& key, int                n, size_t keyIdx = IdxNewEntry);
-        virtual bool setVal(const std::string& key, long               l, size_t keyIdx = IdxNewEntry);
-        virtual bool setVal(const std::string& key, size_t             k, size_t keyIdx = IdxNewEntry);
-        virtual bool setVal(const std::string& key, double             d, size_t keyIdx = IdxNewEntry);
-        virtual bool setVal(const std::string& key, const std::string& s, size_t keyIdx = IdxNewEntry);
+        virtual bool setVar(const std::string& key, const SLVar& s, size_t keyIdx = IdxNewEntry);
         // pointer to new (IdxNewEntry) or existing node (any other value for keyIdx if available)
         virtual IData* getDataWrite(const std::string& key, size_t keyIdx = IdxNewEntry);
 
@@ -104,12 +65,12 @@ namespace sl
         virtual bool erase(const std::string& key, size_t keyIdx = 0);
 
     private:
-        size_t newEntry(const std::string& key, const SLVariant& dv);
+        size_t newEntry(const std::string& key, const SLStore& dv);
         size_t curIdx(bool required) const;
         size_t idx(const std::string& key, size_t keyIdx, bool required) const;
-        bool setVal(const std::string& key, const SLVariant& dv, size_t keyIdx);
+        bool setVal(const std::string& key, const SLStore& dv, size_t keyIdx);
         typedef std::pair<std::string, size_t> KeyIdx;
-        typedef std::vector<SLVariant> DataVarVec;
+        typedef std::vector<SLStore> DataVarVec;
         typedef std::vector<KeyIdx> KeyIdxVec;
         typedef std::vector<std::string> StrVec;
 
@@ -139,67 +100,33 @@ namespace sl
     {
         return IdxNewEntry != idx(key, 0, false);
     }
-    SLDataType Data::type(const std::string& key) const
+    SLVar Data::getVar(const std::string& key) const
     {
-        return m_varData[idx(key, 0, true)].type();
-    }
-    bool Data::getBool(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getBool();
-    }
-    int Data::getInt(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getInt();
-    }
-    long Data::getLong(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getLong();
-    }
-    size_t Data::getSize_t(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getSize_t();
-    }
-    double Data::getDouble(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getDouble();
-    }
-    std::string Data::getStr(const std::string& key) const
-    {
-        return m_varData[idx(key, 0, true)].getStr();
+        const SLStore& store = m_varData[idx(key, 0, true)];
+        if(store.m_data)
+            throw std::runtime_error("Key [" + key + "] is not a scalar");
+        return store.m_var;
     }
     IDataRead* Data::getData(const std::string& key) const
     {
-        return m_varData[idx(key, 0, true)].getData().get();
+        const SLStore& store = m_varData[idx(key, 0, true)];
+        if(!store.m_data)
+            throw std::runtime_error("Key [" + key + "] is not a subtree");
+        return store.m_data.get();
     }
-    bool Data::setVal(const std::string& key, bool b, size_t keyIdx)
+    bool Data::setVar(const std::string& key, const SLVar& var, size_t keyIdx)
     {
-        return setVal(key, SLVariant(b), keyIdx);
-    }
-    bool Data::setVal(const std::string& key, int n, size_t keyIdx)
-    {
-        return setVal(key, SLVariant(n), keyIdx);
-    }
-    bool Data::setVal(const std::string& key, long l, size_t keyIdx)
-    {
-        return setVal(key, SLVariant(l), keyIdx);
-    }
-    bool Data::setVal(const std::string& key, size_t k, size_t keyIdx)
-    {
-        return setVal(key, SLVariant(k), keyIdx);
-    }
-    bool Data::setVal(const std::string& key, double d, size_t keyIdx)
-    {
-        return setVal(key, SLVariant(d), keyIdx);
-    }
-    bool Data::setVal(const std::string& key, const std::string& s, size_t keyIdx)
-    {
-        return setVal(key, SLVariant(s), keyIdx);
+        return setVal(key, SLStore(var), keyIdx);
     }
     IData* Data::getDataWrite(const std::string& key, size_t keyIdx)
     {
-        size_t pos = (IdxNewEntry == keyIdx) ? newEntry(key, SLVariant(createEmptyData())) : idx(key, keyIdx, false);
+        size_t pos = (IdxNewEntry == keyIdx) ? newEntry(key, SLStore(createEmptyData())) : idx(key, keyIdx, false);
         if(pos < m_varData.size())
-            return m_varData[pos].getData().get();
+        {
+            SLStore& store = m_varData[pos];
+            if(SLVTNone == store.m_var.type() && store.m_data)
+                return store.m_data.get();
+        }
         return 0;
     }
     bool Data::erase(const std::string& key, size_t keyIdx)
@@ -212,7 +139,7 @@ namespace sl
             {
                 // users shouldn't really erase keys while reading data but ...
                 if(m_pos < m_keyIdx.size() && m_pos > pos)
-                    --pos;
+                    --m_pos;
                 m_keyIdx.erase(m_keyIdx.begin() + pos);
                 m_keys.erase(m_keys.begin() + pos);
                 m_varData.erase(m_varData.begin() + pos);
@@ -221,7 +148,7 @@ namespace sl
         }
         return false;
     }
-    size_t Data::newEntry(const std::string& key, const SLVariant& dv)
+    size_t Data::newEntry(const std::string& key, const SLStore& dv)
     {
         KeyIdx ki(key, m_keyIdx.size());
         KeyIdxVec::iterator it = std::upper_bound(m_keyIdx.begin(), m_keyIdx.end(), ki, key_less);
@@ -259,7 +186,7 @@ namespace sl
             throw std::exception("sl::Data::idx - key not found");
         return IdxNewEntry;
     }
-    bool Data::setVal(const std::string& key, const SLVariant& dv, size_t keyIdx)
+    bool Data::setVal(const std::string& key, const SLStore& dv, size_t keyIdx)
     {
         if(IdxNewEntry == keyIdx) 
         {
