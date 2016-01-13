@@ -18,7 +18,7 @@ namespace sl
         virtual void write(IDataWrite* data) const
         {
             if(!m_key.empty())
-                data = data->getDataWrite(m_key);
+                data = data->newData(m_key);
             value_type vt;
             ISerializablePtr ser = makeSerializable(m_itemKey, vt);
             const Cont& val = *m_val;

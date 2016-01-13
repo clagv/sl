@@ -39,7 +39,7 @@ namespace sl
     class Data : public IData
     {
     public:
-        Data() : m_pos(IdxNewEntry) {}
+        Data() : m_pos(IdxInvalidPos) {}
 
         // start iterating at current level
         virtual void begin();
@@ -53,22 +53,29 @@ namespace sl
         virtual bool hasKey(const std::string& key) const;
 
         // inspect specific or current (empty key or key matchin current one) item
-        virtual SLVar       getVar   (const std::string& key = std::string()) const;
+        virtual SLVar       getVal   (const std::string& key = std::string()) const;
         virtual IDataRead*  getData  (const std::string& key = std::string()) const;
 
-        // sets new (IdxNewEntry) or existing key (any other value, if available) with val
-        virtual bool setVar(const std::string& key, const SLVar& s, size_t keyIdx = IdxNewEntry);
-        // pointer to new (IdxNewEntry) or existing node (any other value for keyIdx if available)
-        virtual IData* getDataWrite(const std::string& key, size_t keyIdx = IdxNewEntry);
+        // adds new existing key with value val
+        virtual void newVal(const std::string& key, const SLVar& val);
+        // overrides existing key with newVal
+        virtual bool overwriteVal(const std::string& key, const SLVar& newVal, size_t keyIdx = 0);
+
+        // pointer to new node keyed by key
+        virtual IData* newData(const std::string& key);
+        // pointer to existing keyIdx'th node (when there is more than one node with the same key) keyed by key
+        virtual IData* existingData(const std::string& key, size_t keyIdx = 0);
 
         // remove entry (data or value) with specfied key and index keyIdx (if there are multiple entries with that key)
         virtual bool erase(const std::string& key, size_t keyIdx = 0);
 
     private:
+        enum {IdxInvalidPos = -1};
         size_t newEntry(const std::string& key, const SLStore& dv);
         size_t curIdx(bool required) const;
         size_t idx(const std::string& key, size_t keyIdx, bool required) const;
-        bool setVal(const std::string& key, const SLStore& dv, size_t keyIdx);
+        IData* getDataWrite(const std::string& key, size_t keyIdx);
+
         typedef std::pair<std::string, size_t> KeyIdx;
         typedef std::vector<SLStore> DataVarVec;
         typedef std::vector<KeyIdx> KeyIdxVec;
@@ -98,9 +105,9 @@ namespace sl
     }
     bool Data::hasKey(const std::string& key) const
     {
-        return IdxNewEntry != idx(key, 0, false);
+        return IdxInvalidPos != idx(key, 0, false);
     }
-    SLVar Data::getVar(const std::string& key) const
+    SLVar Data::getVal(const std::string& key) const
     {
         const SLStore& store = m_varData[idx(key, 0, true)];
         if(store.m_data)
@@ -114,16 +121,11 @@ namespace sl
             throw std::runtime_error("Key [" + key + "] is not a subtree");
         return store.m_data.get();
     }
-    bool Data::setVar(const std::string& key, const SLVar& var, size_t keyIdx)
-    {
-        return setVal(key, SLStore(var), keyIdx);
-    }
     IData* Data::getDataWrite(const std::string& key, size_t keyIdx)
     {
-        size_t pos = (IdxNewEntry == keyIdx) ? newEntry(key, SLStore(createEmptyData())) : idx(key, keyIdx, false);
-        if(pos < m_varData.size())
+        if(keyIdx < m_varData.size())
         {
-            SLStore& store = m_varData[pos];
+            SLStore& store = m_varData[keyIdx];
             if(SLVTNone == store.m_var.type() && store.m_data)
                 return store.m_data.get();
         }
@@ -160,13 +162,13 @@ namespace sl
     size_t Data::curIdx(bool required) const
     {
         // special case for single value - no need to call begin()
-        if(1 == m_keys.size() && IdxNewEntry == m_pos)
+        if(1 == m_keys.size() && IdxInvalidPos == m_pos)
             return 1;
         if(!end())
             return m_pos;
         if(required)
             throw std::exception("Invalid sl::Data index");
-        return IdxNewEntry;
+        return IdxInvalidPos;
     }
     size_t Data::idx(const std::string& key, size_t keyCount, bool required) const
     {
@@ -184,22 +186,31 @@ namespace sl
         }
         if(required)
             throw std::exception("sl::Data::idx - key not found");
-        return IdxNewEntry;
+        return IdxInvalidPos;
     }
-    bool Data::setVal(const std::string& key, const SLStore& dv, size_t keyIdx)
+    void Data::newVal(const std::string& key, const SLVar& val)
     {
-        if(IdxNewEntry == keyIdx) 
-        {
-            newEntry(key, dv);
-            return true;
-        }
+        newEntry(key, SLStore(val));
+    }
+    bool Data::overwriteVal(const std::string& key, const SLVar& newVal, size_t keyIdx)
+    {
         size_t pos =  idx(key, keyIdx, false);
         if(pos < m_varData.size())
         {
-            m_varData[pos] = dv;
+            m_varData[pos] = SLStore(newVal);
             return true;
         }
         return false;
+    }
+    IData* Data::newData(const std::string& key)
+    {
+        size_t pos = newEntry(key, SLStore(createEmptyData()));
+        return getDataWrite(key, pos);
+    }
+    IData* Data::existingData(const std::string& key, size_t keyIdx)
+    {
+        size_t pos = idx(key, keyIdx, false);
+        return getDataWrite(key, pos);
     }
 
 

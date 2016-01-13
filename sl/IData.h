@@ -19,7 +19,7 @@ namespace sl
         virtual bool hasKey(const std::string& key) const = 0;
 
         // inspect specific or current (empty key or key matching current one) item
-        virtual SLVar       getVar (const std::string& key = std::string()) const = 0;
+        virtual SLVar       getVal (const std::string& key = std::string()) const = 0;
         virtual IDataRead*  getData(const std::string& key = std::string()) const = 0;
 
         virtual ~IDataRead(){}
@@ -28,12 +28,15 @@ namespace sl
     class IDataWrite
     {
     public:
-        enum {IdxNewEntry = -1};
+        // adds new existing key with value val
+        virtual void newVal(const std::string& key, const SLVar& val) = 0;
+        // overrides existing key with newVal
+        virtual bool overwriteVal(const std::string& key, const SLVar& newVal, size_t keyIdx = 0) = 0;
 
-        // sets new (IdxNewEntry) or existing key (any other value, if available) with val
-        virtual bool setVar(const std::string& key, const SLVar& v, size_t keyIdx = IdxNewEntry) = 0;
-        // pointer to new (IdxNewEntry) or existing node (any other value for keyIdx if available)
-        virtual IDataWrite* getDataWrite(const std::string& key, size_t keyIdx = IdxNewEntry) = 0;
+        // pointer to new node keyed by key
+        virtual IDataWrite* newData(const std::string& key) = 0;
+        // pointer to existing keyIdx'th node (when there is more than one node with the same key) keyed by key
+        virtual IDataWrite* existingData(const std::string& key, size_t keyIdx = 0) = 0;
 
         // remove entry (data or value) with specfied key and index keyIdx (if there are multiple entries with that key)
         virtual bool erase(const std::string& key, size_t keyIdx = 0) = 0;

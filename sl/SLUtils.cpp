@@ -8,12 +8,12 @@ namespace sl
         typedef std::vector<ISerializablePtr> Serializables;
         typedef std::vector<std::string> StrVec;
 
-        void getDataType(IDataRead* data, const std::string& key, bool&         b){b = data->getVar(key).get_bool();}
-        void getDataType(IDataRead* data, const std::string& key, long&         l){l = data->getVar(key).get_lng();}
-        void getDataType(IDataRead* data, const std::string& key, int&          n){n = data->getVar(key).get_int();}
-        void getDataType(IDataRead* data, const std::string& key, size_t&       k){k = data->getVar(key).get_szt();}
-        void getDataType(IDataRead* data, const std::string& key, double&       x){x = data->getVar(key).get_dbl();}
-        void getDataType(IDataRead* data, const std::string& key, std::string&  s){s = data->getVar(key).get_chr();}
+        void getDataType(IDataRead* data, const std::string& key, bool&         b){b = data->getVal(key).get_bool();}
+        void getDataType(IDataRead* data, const std::string& key, long&         l){l = data->getVal(key).get_lng();}
+        void getDataType(IDataRead* data, const std::string& key, int&          n){n = data->getVal(key).get_int();}
+        void getDataType(IDataRead* data, const std::string& key, size_t&       k){k = data->getVal(key).get_szt();}
+        void getDataType(IDataRead* data, const std::string& key, double&       x){x = data->getVal(key).get_dbl();}
+        void getDataType(IDataRead* data, const std::string& key, std::string&  s){s = data->getVal(key).get_chr();}
 
         template<typename T>
         struct SLVarSerializable : public ISerializable
@@ -21,7 +21,7 @@ namespace sl
             SLVarSerializable(const std::string& key, T& val) : m_key(key), m_val(&val) {}
             virtual void write(IDataWrite* data) const
             {
-                data->setVar(m_key, SLVar(*m_val));
+                data->newVal(m_key, SLVar(*m_val));
             }
             virtual void read(IDataRead* data)
             {
@@ -53,7 +53,7 @@ namespace sl
         private:
             IDataWrite* dataForKey(const std::string& key, IDataWrite* data) const
             {
-                return key.empty() ? data : data->getDataWrite(key);
+                return key.empty() ? data : data->newData(key);
             }
             IDataRead* dataForKey(const std::string& key, IDataRead* data) const
             {
